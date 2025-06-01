@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<script>
+    const user = localStorage.getItem("userEmail");
+    if (!user) {
+        window.location.href = "signup.html";
+    }
+</script>
+<div id="navbar-container"></div>
+
+<header>
+    <h1>Welcome to Your Dashboard!</h1>
+    <p>Your email: <script>document.write(localStorage.getItem("userEmail"));</script></p>
+    <p>Your id: <script>document.write(localStorage.getItem("userId"));</script></p>
+    <button onclick="logout()">Logout</button>
+</header>
+
+<section id="pass-details">
+    <h2>Your Bus Pass Details:</h2>
+    <div id="pass-info">Loading...</div>
+</section>
+
+
+<script>
+    function logout() {
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("userPassword");
+        localStorage.removeItem("userId");   // ✅ Add this line to remove id too
+        alert("You have been logged out.");
+        window.location.href = "login.html";
+    }
+
+        const userId = localStorage.getItem("userId");
+
+        // Fetch pass details
+    fetch(`http://localhost:8080/api/buspass/user/${userId}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("No bus pass found");
+            }
+            return response.json(); // Parse the JSON response
+        })
+        .then(data => {
+            if (data) {
+                const passInfo = `
+                    <p><strong>Route:</strong> ${data.route}</p>
+                    <p><strong>Start Date:</strong> ${data.startDate}</p>
+                    <p><strong>End Date:</strong> ${data.endDate}</p>
+                `;
+                document.getElementById("pass-info").innerHTML = passInfo;
+            } else {
+                document.getElementById("pass-info").innerHTML = "<p>No Bus Pass Applied Yet.</p>";
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching pass details:", error);
+            document.getElementById("pass-info").innerHTML = "<p>No Bus Pass Applied Yet.</p>";
+        });
+</script>
+<script src="script.js"></script>
+</body>
+</html>
